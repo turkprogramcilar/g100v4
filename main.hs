@@ -1,4 +1,4 @@
-
+import Data.Time.Clock
 
 
 
@@ -7,4 +7,5 @@
 
 
 main :: IO ()
-main = print "ok"
+main = strTime >>= print where
+    strTime = show <$> getCurrentTime
