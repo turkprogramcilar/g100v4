@@ -1,6 +1,7 @@
 import Data.Time.Format
 import Data.Time.Clock ( getCurrentTime )
 import Data.Bits
+import Extra
 
 r1 :: Integer
 r1 = 0x2
@@ -113,7 +114,7 @@ renderAscii text = foldl go "" layers where
 
 main :: IO ()
 main = do 
-    putStrLn (renderAscii "0123456789") 
     time <- getCurrentTime 
-    print time
     putStrLn $ renderAscii $ show $ formatTime defaultTimeLocale "%T" time
+    --sleep 1
+    --main
