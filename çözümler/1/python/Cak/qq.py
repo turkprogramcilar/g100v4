@@ -1,1 +1,0 @@
-print("bu bir denemedir")
