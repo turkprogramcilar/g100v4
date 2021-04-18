@@ -1,3 +1,6 @@
+
+![Preview](preview.gif "Preview")
+
 Sisteminizde cabal yüklü olması gerekir. 
 `cabal run` komutu ile çalıştırabilirsiniz.
 
