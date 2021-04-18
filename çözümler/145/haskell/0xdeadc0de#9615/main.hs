@@ -1,7 +1,8 @@
 import Data.Time.Format
 import Data.Time.Clock ( getCurrentTime )
-import Data.Bits
-import Control.Concurrent
+import Data.Bits ( Bits((.&.)) )
+import Control.Concurrent ( threadDelay )
+import System.Console.ANSI
 
 r1 :: Integer
 r1 = 0x2
@@ -102,7 +103,7 @@ getCode x = case x of
     '8' -> eight
     '9' -> nine
     '0' -> zero
-    _   -> 0x0
+    ___ -> 0x0
 
 newLine :: Char 
 newLine = '\n'
@@ -114,6 +115,7 @@ renderAscii text = foldl go "" layers where
 
 main :: IO ()
 main = do 
+    clearScreen
     time <- getCurrentTime 
     putStrLn $ renderAscii $ show $ formatTime defaultTimeLocale "%T" time
     threadDelay 1000000

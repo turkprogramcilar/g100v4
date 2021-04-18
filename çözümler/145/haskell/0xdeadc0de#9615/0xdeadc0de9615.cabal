@@ -55,7 +55,7 @@ executable 0xdeadc0de9615
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.14.1.0, time
+    build-depends:    base ^>=4.14.1.0, time, ansi-terminal
 
     -- Directories containing source files.
     -- hs-source-dirs:
