@@ -104,7 +104,6 @@ int main()
     map<Node*,int>* table = map_2d -> first;
     Node * current_node = map_2d->second.first; // Baslangic Node
     int current_value = map_2d->second.second; // Toplam deger
-    (*table)[current_node] = 0;
     while (!current_node->is_last) // Son dugumde mi kontrol
     {
         current_node->is_used = true;
