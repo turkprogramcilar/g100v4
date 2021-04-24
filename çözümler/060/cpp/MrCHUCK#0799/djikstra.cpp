@@ -1,139 +1,105 @@
 #include <iostream>
-#include <map>
-#include <utility>
-#include <vector>
+#include <set>
 #include "fstream"
+#include <map>
+#include <vector>
+#include <sstream>
+#include <algorithm>
 using namespace std;
 
 struct Node
 {
 public:
-    bool is_used = false,is_first = false,is_last = false;
-    map<Node*,int> connection;
+    int value;
+    bool is_used = false,is_reachable = false;
+    int reach_distance = 2147483645;
+    set<Node*> connection;
+    explicit Node(int value) :value(value){};
 };
 
-pair<map<Node*,int>*,pair<Node*,int>>* Node_Maker_2D(vector<vector<int>> * map_2d_int,pair<int,int> start,pair<int,int> finish)
+void read_as_int(const string& path,map<pair<int,int>,Node*> &node_map)
 {
-    // Fazla takma sadece Nodelari birlestiriyorum
-    auto * table = new map<Node*,int>;
-    static auto* node_map = new pair<map<Node*,int>*,pair<Node*,int>>;
-    node_map->first = table;
-    vector<Node*> temp;
-    unsigned int height = (*map_2d_int).size(),width = (*map_2d_int)[0].size();
-    for (auto x = 0; x < height; x++)
-    {
-        for (auto y = 0; y < width; y++)
-        {
-            Node *temp_node = new Node();
-            temp.push_back(temp_node);
-            (*node_map).first ->insert({temp_node,numeric_limits<int>::max()});
-            if(start.first == x && start.second == y)
-            {
-                node_map->second.first = temp_node;
-                node_map->second.second = (*map_2d_int)[start.first][start.second];
-            }
-            if(finish.first == x && finish.second == y)
-            {
-                temp_node->is_last = true;
-            }
-        }
-
-    }
-    int count = 0;
-    for(auto &temp_pair : temp)
-    {
-        //Burasi baglama kurallarini koydugumuz yer
-        int  x = count /width, y = count % width;
-        bool is_can_up = x + 1 < height;
-        bool is_can_down = x - 1 >= 0;
-        bool is_can_right = y + 1 < width;
-        bool is_can_left = y - 1 >= 0;
-        if(is_can_up)
-            temp_pair->connection[temp[count + width]] = (*map_2d_int)[x + 1][y];
-        if(is_can_down)
-            temp_pair->connection[temp[count - width]] = (*map_2d_int)[x - 1][y];
-        if(is_can_right)
-            temp_pair->connection[temp[count + 1]] = (*map_2d_int)[x][y + 1];
-        if(is_can_left)
-            temp_pair->connection[temp[count - 1]] = (*map_2d_int)[x][y - 1];
-        count++;
-    }
-    return node_map;
-};
-
-vector<vector<int>> * read_as_int(const string& path)
-{
-    string sum;
-    char text;
+    string number;
     ifstream file(path);
-    static vector<vector<int>> temp_t;
-    vector<int> temp;
-    while (file.get(text))
+    int x = 0;
+    while(getline(file, number))//Dosyadan satir aliyorum
     {
-        if ((int)text > 47) // Gelen eger ki bir sayi ise
+        int y = 0;
+        stringstream s(number);
+        while(getline(s,number,','))//Virgulden virgule numara aliyorum
         {
-            sum += text;// Onceden gelen string sayi ile birlestir
+            node_map[{x,y}] = new Node(stoi(number));//Node olusturuyorum
+            y++;
         }
-
-        else
-        {
-            temp.push_back(stoi(sum));//Eger gelen sayi ise int olarak vectore at
-            sum = "";// Yeni sayilar icin temizle
-
-            if((int)text == 10)// Eger ki gelen \n ise vectoru ekle ve sonra bosalt
-            {
-                temp_t.push_back(temp);
-                temp.clear();
-            }
-        }
-
-
+        x++;
     }
-    file.close();// Dosya acik kalmasin
-    return &temp_t;
+    file.close();
+}
+
+
+void connect_node(map<pair<int,int>,Node*> &node_map,int x, int y, int acc_x)
+{
+    if(acc_x > x)
+    {
+        for(auto i = 0; i < y ; i++)
+        {
+            node_map[{x,i}]->connection.insert(node_map[{x,i + 1}]);
+            node_map[{x,i + 1}]->connection.insert(node_map[{x,i}]);
+            node_map[{acc_x ,i}]->connection.insert(node_map[{acc_x ,i + 1}]);
+            node_map[{acc_x,i + 1}]->connection.insert(node_map[{acc_x,i}]);
+            node_map[{acc_x ,i}]->connection.insert(node_map[{acc_x - 1,i}]);
+            node_map[{acc_x - 1 ,i}]->connection.insert(node_map[{acc_x,i}]);
+            node_map[{x ,i}]->connection.insert(node_map[{x + 1,i}]);
+            node_map[{x + 1 ,i}]->connection.insert(node_map[{x,i}]);
+        }
+
+        node_map[{acc_x ,y}]->connection.insert(node_map[{acc_x - 1,y}]);
+        node_map[{acc_x - 1 ,y}]->connection.insert(node_map[{acc_x,y}]);
+        node_map[{x ,y}]->connection.insert(node_map[{x + 1,y}]);
+        node_map[{x + 1 ,y}]->connection.insert(node_map[{x,y}]);
+        return connect_node(node_map,++x,y,--acc_x);
+    }
 
 }
 
 
+int main() {
+    map<pair<int, int>, Node *> table;
+    read_as_int("/home/mrchuck/Desktop/cpp/my_node_project/p083_matrix.txt", table);//Dosyayi okuyorum ve nodelari olusturuyorum
+    connect_node(table, 0, 79, 79);// Nodelari bagliyorum
+    auto *current_node = table[{0, 0}];//Ilk node
+    current_node->reach_distance = current_node->value;//Ilk node oldugu icin ulastigimiz mesafe kendi degeri oluyor
+    auto *finish = table[{79, 79}];//Ulasilmasi gereken node
+    vector<Node *> un_used_sorted_list{current_node};//Kesfettigimiz ve kullanmadigimiz nodelari burada sirali sekilde tutuyoruz
 
-
-int main()
-{
-    //map_2d.first = Tum nodelar ve hepsi sonsuz, map_2d.second = baslangic nodeu ve degeri
-    pair<map<Node*,int>*,pair<Node*,int>>* map_2d = Node_Maker_2D(read_as_int("/home/mrchuck/Desktop/cpp/Djikstra/p083_matrix.txt"),{0,0},{79,79});
-    map<Node*,int>* table = map_2d -> first;
-    Node * current_node = map_2d->second.first; // Baslangic Node
-    int current_value = map_2d->second.second; // Toplam deger
-    while (!current_node->is_last) // Son dugumde mi kontrol
+    while (current_node != finish)//SOn node'a kadar donduruyoruz
     {
-        current_node->is_used = true;
-        Node * next; // En kucuk kullanilmamis baglanti temp
-        int temp = numeric_limits<int>::max();
-        for(auto x:current_node->connection)//o anki bulunan nodein bagli oldugu nodelara bakiyor
+        current_node ->is_used = true;//Kullandigimizi belirtiyoruz
+        un_used_sorted_list.pop_back();//Ve listeden siliyoruz
+        for(auto &_node : current_node->connection)//O anki nodedn bagli oldugu nodlari kesfediyoruz
         {
-            if(!x.first->is_used) // Baktigi node kullanilmamissa
+            if(!_node->is_used)//Eger ki kullanilmamissa
             {
-                if(current_value + x.second < (*table)[x.first])// Eger kullanilmamis ve sonsuz ise veya daha dusuk ulasilabiliyorsa
+                int temp_distance = current_node->reach_distance + _node->value;//Ona daha kisa mesafeden ulasabiliyorsak guncelliyoruz
+                if (_node->reach_distance > temp_distance )
                 {
-                    (*table)[x.first] = current_value + x.second; // Onu sonsuzdan cikariyoruz cunku ona ulastik veya kuculttuk
+                    _node->reach_distance = temp_distance;
+                    if(!_node->is_reachable)//Egerki kesfedilmemisse kesfedildigini belirtiyoruz, kullanilmamislar listesine atiyoruz
+                    {
+                        un_used_sorted_list.push_back(_node);
+                        _node->is_reachable = true;
+                    }
                 }
             }
         }
-        for(auto x:(*table))//Tabloda en kucuk kullanilmamis ariyoruz
-        {
-            if(!x.first->is_used) // Baktigi node kullanilmamissa
-            {
-                if(temp > (*table)[x.first])
-                {
-                    temp = (*table)[x.first];
-                    next = x.first;
-                }
-            }
-        }
-        current_value = temp;
-        current_node = next;
+        //Buyukten kucuge siraliyoruz
+        sort(un_used_sorted_list.begin(),un_used_sorted_list.end(),[](Node* node1, Node* node2){return node1->reach_distance > node2 -> reach_distance;});
+        //Sondakini seciyoruz
+        current_node = un_used_sorted_list.back();
+
+
+
     }
-
-
-    cout << (*table)[current_node] << endl;
+    cout << finish->reach_distance << endl;
+    return 0;
 }
