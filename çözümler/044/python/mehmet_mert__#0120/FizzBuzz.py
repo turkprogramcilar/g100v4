@@ -8,4 +8,6 @@ while True:
         print(a, "Buzz")
     elif a % 3 == 0:
         print(a, "Fizz")
+    else:
+        print(a)
     time.sleep(0.2)
