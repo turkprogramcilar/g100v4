@@ -2,9 +2,10 @@ alfabe = "abcdefghijklmnopqrstuvwxyz"
 text = input("Metninizi girin:")
 result = ""
 for i in text:
-    sayı = alfabe.index(i)
+    #Kullanıcı saçma karakterler girebilir.
     try:
-        result += alfabe[sayı+13]
+        sayi = alfabe.index(i)
+        result+=alfabe[(sayi+13)%len(alfabe)]
     except:
-        result += alfabe[sayı - 13]
+        result+=str(i)
 print(result)

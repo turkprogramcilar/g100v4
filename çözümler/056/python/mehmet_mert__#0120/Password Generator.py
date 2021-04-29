@@ -1,7 +1,16 @@
 import string
 import random
 
-length = int(input("How many digits should your password be:"))
+while True:
+    try:
+        length = input("How many digits should your password be:")
+        if int(length)>0:
+            length = int(length)
+            break
+        else:
+            print("You should give a positive number.")
+    except:
+        print("You should give a positive number.")
 
 symbols_q = input("Do you want symbols (y for yes):")
 symbols = "!*+-{}"
